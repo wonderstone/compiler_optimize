@@ -3,17 +3,22 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"runtime/pprof"
 	"time"
 
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/pkg/profile"
 )
 
 // const pprofMode = "pcpu"
+// const pprofMode = "pmem"
 
-const pprofMode = "pmem"
+const pprofMode = "net"
 
 func generate(n int) []int {
 	rand.Seed(time.Now().UnixNano())
@@ -50,6 +55,13 @@ func main() {
 		defer profile.Start().Stop()
 	case "pmem":
 		defer profile.Start(profile.MemProfile, profile.MemProfileRate(1)).Stop()
+	case "net":
+		go func() {
+			fmt.Println(http.ListenAndServe("localhost:6060", nil))
+		}()
+		// read some data from os.Stdin and assign it to a variable
+		var input string
+		defer fmt.Scan(&input)
 
 	}
 
